@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+        }
+        h3 {
+            color: #343a40;
+        }
+        .checkbox-group {
+            margin-bottom: 15px;
+        }
+        label {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        select, button {
+            margin-top: 10px;
+            padding: 8px;
+            font-size: 14px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .close-button {
+            background-color: #dc3545;
+        }
+        .close-button:hover {
+            background-color: #c82333;
+        }
+    </style>
+    <script>
+        function submitForm() {
+            const selectedColumns = Array.from(document.querySelectorAll('input[name="columns"]:checked')).map(el => el.value);
+            const sortColumn = document.getElementById('sortColumn').value;
+            const sortOrder = document.getElementById('sortOrder').value;
+
+            // Pass the selected columns, sort column, and sort order to the Apps Script
+            google.script.run.filterDataWithSorting(selectedColumns, sortColumn, sortOrder);
+            google.script.host.close();
+        }
+
+        window.onload = function() {
+            google.script.run.withSuccessHandler(function(headers) {
+                const container = document.getElementById('columnChecklist');
+                headers.forEach(header => {
+                    const checkbox = document.createElement('div');
+                    checkbox.classList.add('checkbox-group');
+                    checkbox.innerHTML = `
+                        <input type="checkbox" name="columns" value="${header}">
+                        <label>${header}</label>
+                    `;
+                    container.appendChild(checkbox);
+
+                    // Dynamically add the same headers to the sorting dropdown
+                    const sortSelect = document.getElementById('sortColumn');
+                    const option = document.createElement('option');
+                    option.value = header;
+                    option.textContent = header;
+                    sortSelect.appendChild(option);
+                });
+            }).getHeaders();
+        };
+    </script>
+</head>
+<body>
+    <h3>Filter Students</h3>
+
+    <!-- Section for selecting columns -->
+    <div id="columnChecklist"></div>
+
+    <!-- Sorting options -->
+    <label for="sortColumn">Sort By:</label>
+    <select id="sortColumn">
+        <option value="">None</option>
+    </select>
+    
+    <label for="sortOrder">Sort Order:</label>
+    <select id="sortOrder">
+        <option value="ascending">Ascending</option>
+        <option value="descending">Descending</option>
+    </select>
+
+    <!-- Action buttons -->
+    <br>
+    <button type="button" onclick="submitForm()">Submit</button>
+    <button type="button" class="close-button" onclick="google.script.host.close()">Close</button>
+</body>
+</html>
